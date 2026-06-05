@@ -20,11 +20,19 @@ export function createTelegram(token) {
 
   return {
     call,
+
     sendMessage(chatId, text, extra = {}) {
       return call('sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', ...extra });
     },
     editMessageText(chatId, messageId, text, extra = {}) {
       return call('editMessageText', { chat_id: chatId, message_id: messageId, text, parse_mode: 'HTML', ...extra });
+    },
+    editMessageReplyMarkup(chatId, messageId, replyMarkup) {
+      return call('editMessageReplyMarkup', {
+        chat_id: chatId,
+        message_id: messageId,
+        reply_markup: replyMarkup || { inline_keyboard: [] },
+      });
     },
     answerCallbackQuery(id, text, extra = {}) {
       return call('answerCallbackQuery', { callback_query_id: id, text, ...extra });
@@ -35,6 +43,13 @@ export function createTelegram(token) {
 
     async startPolling(handler) {
       running = true;
+      // drop what is already queued, a restart shouldn't replay old updates
+      try {
+        const initial = await call('getUpdates', { timeout: 0, offset: -1 });
+        if (initial.length) offset = initial[initial.length - 1].update_id + 1;
+      } catch (e) {
+        console.error('getUpdates(init) error:', e.message);
+      }
       while (running) {
         let updates = [];
         try {
