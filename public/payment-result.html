@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment result</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 3rem auto; max-width: 32rem; padding: 0 1rem; }
+    .status { padding: 1rem; border: 1px solid #cccccc; border-radius: 8px; }
+    code { background: #f2f2f2; padding: 0 0.25rem; }
+  </style>
+</head>
+<body>
+  <h1>Payment result</h1>
+  <p>This is where the bank returns the customer's browser after a payment (the
+     BACK_URL). It reads the payment id from the query string and asks the server
+     for the final state via GetPaymentDetails.</p>
+  <div class="status" id="out">Checking...</div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const paymentId = params.get('id') || params.get('paymentId');
+    const out = document.getElementById('out');
+    if (!paymentId) {
+      out.textContent = 'No payment id in the URL.';
+    } else {
+      fetch('/api/payment-details?paymentId=' + encodeURIComponent(paymentId))
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.error) { out.textContent = 'Error: ' + d.error; return; }
+          out.innerHTML = 'Order status: <code>' + (d.status || 'unknown') + '</code>'
+            + (d.state ? '<br>Gateway state: <code>' + d.state + '</code>' : '');
+        })
+        .catch((e) => { out.textContent = 'Request failed: ' + e.message; });
+    }
+  </script>
+</body>
+</html>
