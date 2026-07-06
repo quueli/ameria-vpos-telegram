@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "Telegram bot and Express server integrating the AmeriaBank vPOS payment gateway.",
   "license": "MIT",
   "author": "quueli",
   "engines": {
@@ -11,9 +12,16 @@
   "scripts": {
     "start": "node bot/index.js",
     "server": "node server/server.js",
-    "test": "node --test"
+    "demo": "node demo/run-demo.js",
+    "test": "node --test",
+    "lint": "eslint ."
   },
   "dependencies": {
     "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0"
   }
 }
